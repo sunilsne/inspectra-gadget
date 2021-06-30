@@ -3,59 +3,38 @@
 
 # In[1]:
 
-
 import requests
-
 
 # In[2]:
 
-
 import glob
-
 
 # In[3]:
 
-
-import pandas as pd
-
+import bs4 as bs
 
 # In[4]:
 
-
-import bs4 as bs
-
-
-# In[5]:
-
-
 from bs4 import BeautifulSoup
 
-
-# In[6]:
-
+# In[5]:
 
 ##Generate empty list of PIDs
 PIDs = []
 
-
-# In[7]:
-
+# In[6]:
 
 ##Populate list of PIDs
 for filename in glob.iglob('/grp/hst/cos2/cosmo/*', recursive=True):
     file_name = filename[20:]
     PIDs.append(file_name)
 
-
-# In[8]:
-
+# In[7]:
 
 ##Generate empty list of PIDs that have EtcRunIds
 PIDs_with_etcrunid = []
 
-
-# In[9]:
-
+# In[8]:
 
 ##Filtering
 for value in PIDs:
@@ -64,90 +43,68 @@ for value in PIDs:
     else:
         pass
 
-
-# In[10]:
-
+# In[9]:
 
 ##Populating list of PIDs with EtcRunIds
 Ordered_PIDs_with_etcrunids = sorted(PIDs_with_etcrunid)[236:865]
 
-
-# In[11]:
-
+# In[10]:
 
 ##Generate empty list of files
 files = []
 
-
-# In[12]:
-
+# In[11]:
 
 ##Retrieve URLs
 for PID in Ordered_PIDs_with_etcrunids:
     URL = 'https://www.stsci.edu/hst/phase2-public/'+PID+'.apt'
     files.append(URL)
 
-
-# In[13]:
-
+# In[12]:
 
 ##Generate empty list to hold page numbers
 pagenumbers = []
 
+# In[13]:
 
-# In[14]:
-
-
+##Assign page numbers to keep track of files
 for key in range(626):
     pagename = 'page'+str(key)
     pagenumbers.append(pagename)
-pagenumbers
 
+# In[14]:
+
+##Generate empty list of beautiful soup objects
+exposure_names = []
 
 # In[15]:
 
-
-exposure_names = []
-
-
-# In[16]:
-
-
+##Populate list of exposures
 for z in range(626):
     exposure_name = 'exposure' + str(z)
     exposure_names.append(exposure_name)
 
+# In[16]:
 
-# In[17]:
-
-
+##Parse xml files
 for filenumber in range(626):
     page = requests.get(files[filenumber])
     pagenumbers[filenumber] = bs.BeautifulSoup(page.text, 'lxml')
     exposure_names[filenumber] = pagenumbers[filenumber].find_all('exposure')
 
+# In[17]:
+
+##Generate empty list of run ids
+etc_run_ids = []
 
 # In[18]:
 
-
-exposure_names
-
-
-# In[60]:
-
-
-etc_run_ids = []
-
-
-# In[61]:
-
-
+##Generate empty list of stis/other unwanted data
 rejects = []
 
+# In[19]:
 
-# In[62]:
-
-
+##Search for run ids in each file
 for j in range(626):
     for i in exposure_names[j]:
         attributes_dictionary = i.attrs
@@ -157,98 +114,70 @@ for j in range(626):
         else:
             rejects.append(run_id)
 
+# In[20]:
 
-# In[63]:
-
-
+##Populate results list
 results = list(set(etc_run_ids))
-results
 
+# In[21]:
 
-# In[64]:
-
-
+##Populate reject list
 list(set(rejects))
 
+# In[22]:
 
-# In[65]:
-
-
+##Write results to results file
 textfile = open('/users/ssunilkumar/desktop/cos_data/etcrunid_list.txt', "w")
 for element in results:
     textfile.write(element + "\n")
 textfile.close()
 
+# In[23]:
 
-# In[66]:
-
-
+##Write rejects to file
 textfile_rejects = open('/users/ssunilkumar/desktop/cos_data/reject_list.txt', 'w')
 for o in rejects:
     textfile_rejects.write(str(o) + '\n')
 textfile.close()
 
-
-# In[67]:
-
+# In[24]:
 
 textfile
 
-
-# In[68]:
-
+# In[25]:
 
 textfile_rejects
 
-
-# In[ ]:
-
-
 ##single file##
 
-
-# In[ ]:
-
+# In[26]:
 
 file = requests.get(files[607])
 
-
-# In[ ]:
-
+# In[27]:
 
 parsed_file = bs.BeautifulSoup(file.text, 'lxml')
 
-
-# In[ ]:
-
+# In[28]:
 
 ##Generate list of exposures
 exposures = parsed_file.find_all('exposure')
 
-
-# In[ ]:
-
+# In[29]:
 
 EtcRunIds = []
 
-
-# In[ ]:
-
+# In[30]:
 
 for i in exposures:
     attributes_dictionary = i.attrs
     EtcRunId = (attributes_dictionary.get('etcrunid'))
     EtcRunIds.append(EtcRunId)
 
-
-# In[ ]:
-
+# In[31]:
 
 Unique_EtcRunIds = list(set(EtcRunIds))
 
-
-# In[ ]:
-
+# In[32]:
 
 Unique_EtcRunIds
-
